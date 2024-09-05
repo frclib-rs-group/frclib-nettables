@@ -1,6 +1,5 @@
 use std::{collections::HashSet, net::SocketAddr};
 
-use frclib_core::value::FrcType;
 use serde::{Deserialize, Serialize};
 
 use super::{subscription::SubscriptionOptions, topic::PublishProperties};
@@ -25,7 +24,7 @@ pub enum NTMessage {
 pub struct PublishTopic {
     pub name: String,
     pub pubuid: u32,
-    pub r#type: FrcType,
+    pub r#type: String,
     /// Initial topic properties.
     /// If the topic is newly created (e.g. there are no other publishers) this sets the topic properties.
     /// If the topic was previously published, this is ignored. The announce message contains the actual topic properties.
@@ -75,7 +74,7 @@ pub struct Announce {
     /// Topic id
     pub id: i32,
     /// Topic type
-    pub r#type: FrcType,
+    pub r#type: String,
     /// If this message was sent in response to a publish message,
     /// the Publisher UID provided in that message. Otherwise absent.
     pub pubuid: Option<i32>,

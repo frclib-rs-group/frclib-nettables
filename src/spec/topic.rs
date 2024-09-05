@@ -1,4 +1,4 @@
-use frclib_core::value::{FrcType, FrcTimestampedValue as TimestampedValue};
+use frclib_core::value::FrcTimestampedValue;
 use serde::{Deserialize, Serialize};
 
 use super::messages::{NTMessage, PublishTopic, UnpublishTopic};
@@ -8,7 +8,7 @@ use super::messages::{NTMessage, PublishTopic, UnpublishTopic};
 pub struct PublishedTopic {
     pub name: String,
     pub pubuid: u32,
-    pub r#type: FrcType,
+    pub r#type: String,
     pub properties: Option<PublishProperties>,
 }
 
@@ -17,16 +17,16 @@ pub struct PublishedTopic {
 pub struct Topic {
     pub name: String,
     #[serde(rename = "type")]
-    pub r#type: FrcType,
+    pub r#type: String,
     pub properties: Option<PublishProperties>,
 }
 
 impl Topic {
     ///Easier way to make a new meta-topic
-    pub(crate) const fn new_meta(name: String) -> Self {
+    pub(crate) fn new_meta(name: String) -> Self {
         Self {
             name,
-            r#type: FrcType::Raw,
+            r#type: String::from("raw"),
             properties: None,
         }
     }
@@ -69,8 +69,8 @@ impl PublishedTopic {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone)]
 pub struct TopicValue {
     pub(crate) topic: String,
-    pub(crate) value: TimestampedValue,
+    pub(crate) value: FrcTimestampedValue,
 }

@@ -6,7 +6,7 @@ use std::{
     sync::{atomic::AtomicBool, Arc},
 };
 
-use frclib_core::value::{FrcTimestampedValue, FrcType};
+use frclib_core::value::FrcTimestampedValue;
 use nohash_hasher::{IntMap, IntSet};
 use tokio_tungstenite::tungstenite::protocol::Message;
 
@@ -19,7 +19,7 @@ use crate::{
     bimap::PrimBiMap,
     error::NtSuccess,
     spec::{
-        extensions::FrcTimestampedValueExt,
+        extensions::{FrcTimestampedValueExt, FrcTypeExt},
         messages::{
             Announce, NTMessage, PublishTopic, SetProperties, Subscribe, UnAnnounce,
             UnpublishTopic, Unsubscribe,
@@ -39,6 +39,8 @@ use super::{
         SubUID, TopicIdx,
     },
 };
+
+
 
 #[derive(Debug, Clone)]
 pub(super) struct ConnectedClient {
@@ -572,13 +574,13 @@ impl InnerServer {
                 )))?;
             }
             let r#type = if topic_name.contains("$") {
-                FrcType::Raw
+                "raw".to_string()
             } else {
                 match topic_values.get(&topic_idx) {
-                    Some(timstamped_value) => timstamped_value.value.get_type(),
+                    Some(timstamped_value) => timstamped_value.value.get_type().stringify(),
                     None => {
                         if let Some(topic) = topics.get(&topic_idx) {
-                            topic.r#type
+                            topic.r#type.clone()
                         } else {
                             tracing::error!("topic_value_map missing topic_idx: {}", topic_idx);
                             continue;

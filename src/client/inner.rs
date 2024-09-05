@@ -149,7 +149,7 @@ impl InnerClient {
 
         tracing::debug!("Sending Value: {value:?}");
 
-        Ok(self.send_message(Message::Binary(buf)).await?)
+        self.send_message(Message::Binary(buf)).await
     }
 
     /// Value should match topic type

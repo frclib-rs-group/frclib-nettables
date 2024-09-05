@@ -8,6 +8,7 @@ pub trait FrcTypeExt {
     fn from_u8(byte: u8) -> Option<Self>
     where
         Self: Sized;
+    fn stringify(&self) -> String;
 }
 
 impl FrcTypeExt for FrcType {
@@ -18,8 +19,8 @@ impl FrcTypeExt for FrcType {
             Self::Int => 2,
             Self::Float => 3,
             Self::String => 4,
-            Self::Raw | Self::Void | Self::Struct(_) => 5,
-            Self::BoolArray => 16,
+            Self::Raw | Self::Void | Self::Struct(_) | Self::StructArray(_) => 5,
+            Self::BooleanArray => 16,
             Self::DoubleArray => 17,
             Self::IntArray => 18,
             Self::FloatArray => 19,
@@ -34,13 +35,33 @@ impl FrcTypeExt for FrcType {
             3 => Some(Self::Float),
             4 => Some(Self::String),
             5 => Some(Self::Raw),
-            16 => Some(Self::BoolArray),
+            16 => Some(Self::BooleanArray),
             17 => Some(Self::DoubleArray),
             18 => Some(Self::IntArray),
             19 => Some(Self::FloatArray),
             20 => Some(Self::StringArray),
             _ => None,
         }
+    }
+    fn stringify(&self) -> String {
+        match self {
+            Self::Boolean => "boolean",
+            Self::Double => "double",
+            Self::Int => "int",
+            Self::Float => "float",
+            Self::String => "string",
+            Self::Raw | Self::Void => "raw",
+            Self::Struct(desc) => desc.type_str,
+            Self::StructArray(desc) => {
+                return format!("{}[]", desc.type_str);
+            }
+            Self::BooleanArray => "boolean[]",
+            Self::DoubleArray => "double[]",
+            Self::IntArray => "int[]",
+            Self::FloatArray => "float[]",
+            Self::StringArray => "string[]",
+        }
+        .to_string()
     }
 }
 

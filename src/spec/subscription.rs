@@ -3,7 +3,6 @@ use std::{
     sync::{Arc, Weak},
 };
 
-use frclib_core::value::FrcType;
 use futures_util::Stream;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
@@ -17,7 +16,7 @@ use super::{
 pub struct MessageData {
     pub topic_name: String,
     pub timestamp: u32,
-    pub r#type: FrcType,
+    pub r#type: String,
     pub data: rmpv::Value,
 }
 
