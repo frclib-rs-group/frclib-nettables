@@ -9,6 +9,6 @@ The client is forked from [Tsar Boomba's Implementation](https://github.com/tsar
 - [X] Rust Client connect to Rust Server
 - [X] Metatopic compliant
 - [ ] Document protocol better (happening in `rewrite` branch)
-- [ ] Allow running on any async executor/runtime
-- [ ] Better support for publisher config (not caching and persistent topics)
-- [ ] RTT websocket of NT4.1 
+- [ ] Allow running on any async executor/runtime (happening in `rewrite` branch)
+- [ ] Better support for publisher config (not caching and persistent topics) (happening in `rewrite` branch)
+- [ ] RTT websocket of NT4.1  (happening in `rewrite` branch)
