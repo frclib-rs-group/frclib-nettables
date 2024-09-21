@@ -1,87 +1,111 @@
-// use std::collections::VecDeque;
-
-use frclib_core::value::FrcType;
 use serde::{Deserialize, Serialize};
 
-use crate::{NetworkTablesError, now};
+use crate::{now, NetworkTablesError};
 
-use super::{extensions::FrcTypeExt, subscription::SubscriptionOptions};
+use super::SubscriptionOptions;
 
+/// [NT4 Spec Equivalent](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc#connected-clients-clients)
+/// 
+/// The server shall update this topic when a client connects or disconnects.
 #[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-pub struct PublisherMTE {
-    ///Empty string for server publishers
-    pub(crate) client: String,
-    ///A client-generated unique identifier for this publisher
-    pub(crate) pubuid: u32,
+pub struct ClientMetaValue {
+    pub(crate) id: String,
+    ///Connection information about the client; typically host:port
+    pub(crate) conn: String,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-pub struct ClientPublisherMTE {
-    pub(crate) topic: String,
-    ///A client-generated unique identifier for this publisher
-    pub(crate) uid: u32,
-}
-pub type ServerPublisherMTE = ClientPublisherMTE;
-
+/// [NT4 Spec Equivalent](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc#client-subscriptions-clientsubclient)
+/// 
+/// The server shall update this topic when the corresponding client subscribes or unsubscribes to any topic.
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SubscriptionMTE {
-    ///Empty string for server subscriptions
-    pub(crate) client: String,
-    ///A client-generated unique identifier for this subscription
-    pub(crate) subuid: u32,
-    pub(crate) options: SubscriptionOptions,
-}
-impl PartialEq for SubscriptionMTE {
-    fn eq(&self, other: &Self) -> bool {
-        self.client == other.client && self.subuid == other.subuid
-    }
-}
-impl Eq for SubscriptionMTE {}
-impl std::hash::Hash for SubscriptionMTE {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
-        self.client.hash(state);
-        self.subuid.hash(state);
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ClientSubscriptionMTE {
+pub struct ClientSubscriptionMetaValue {
     ///A client-generated unique identifier for this subscription
     pub(crate) uid: u32,
     ///One or more topic names or prefixes (if the `prefix` option is true) that messages are sent for
     pub(crate) topics: Vec<String>,
     pub(crate) options: SubscriptionOptions,
 }
-impl PartialEq for ClientSubscriptionMTE {
+impl PartialEq for ClientSubscriptionMetaValue {
     fn eq(&self, other: &Self) -> bool {
         self.uid == other.uid && self.topics == other.topics
     }
 }
-impl Eq for ClientSubscriptionMTE {}
-impl std::hash::Hash for ClientSubscriptionMTE {
+impl Eq for ClientSubscriptionMetaValue {}
+impl std::hash::Hash for ClientSubscriptionMetaValue {
     fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
         self.uid.hash(state);
         self.topics.hash(state);
     }
 }
-pub type ServerSubscriptionMTE = ClientSubscriptionMTE;
+/// [NT4 Spec Equivalent](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc#server-subscriptions-serversub)
+/// 
+/// Same as [`ClientSubscriptionMetaValue`], except it’s updated when the server subscribes or unsubscribes to any topic.
+pub type ServerSubscriptionMetaValue = ClientSubscriptionMetaValue;
 
-#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
-pub struct ClientMTE {
-    pub(crate) id: String,
-    ///Connection information about the client; typically host:port
-    pub(crate) conn: String,
+/// [NT4 Spec Equivalent](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc#subscriptions-subtopic)
+/// 
+/// The server shall update this topic when a client subscribes or unsubscribes to <topic>.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SubscriptionMetaValue {
+    ///Empty string for server subscriptions
+    pub(crate) client: String,
+    ///A client-generated unique identifier for this subscription
+    pub(crate) subuid: u32,
+    pub(crate) options: SubscriptionOptions,
+}
+impl PartialEq for SubscriptionMetaValue {
+    fn eq(&self, other: &Self) -> bool {
+        self.client == other.client && self.subuid == other.subuid
+    }
+}
+impl Eq for SubscriptionMetaValue {}
+impl std::hash::Hash for SubscriptionMetaValue {
+    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+        self.client.hash(state);
+        self.subuid.hash(state);
+    }
 }
 
+/// [NT4 Spec Equivalent](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc#client-publishers-clientpubclient)
+/// 
+/// The server shall update this topic when the corresponding client publishes or unpublishes any topic.
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
+pub struct ClientPublisherMetaValue {
+    pub(crate) topic: String,
+    ///A client-generated unique identifier for this publisher
+    pub(crate) uid: u32,
+}
+/// [NT4 Spec Equivalent](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc#server-publishers-serverpub)
+/// 
+/// Same as [`ClientPublisherMetaValue`], except it’s updated when the server publishes or unpublishes any topic.
+pub type ServerPublisherMetaValue = ClientPublisherMetaValue;
+
+/// [NT4 Spec Equivalent](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc#publishers-pubtopic)
+/// 
+/// The server shall update this topic when a client publishes or unpublishes to <topic>.
+#[derive(Debug, Clone, Serialize, Deserialize, Hash, PartialEq, Eq)]
+pub struct PublisherMetaValue {
+    ///Empty string for server publishers
+    pub(crate) client: String,
+    ///A client-generated unique identifier for this publisher
+    pub(crate) pubuid: u32,
+}
+
+/// [NT4 Spec Equivalent](https://github.com/wpilibsuite/allwpilib/blob/main/ntcore/doc/networktables4.adoc#server-published-meta-topics)
+/// 
+/// The server shall publish a standard set of topics with information about server state.
+/// Clients may subscribe to these topics for diagnostics purposes or to determine when to publish value changes.
+/// These topics are hidden—​they are not announced to subscribers to an empty prefix,
+/// only to subscribers that have subscribed to "$" or longer prefixes.
 #[derive(Debug, Clone)]
 pub enum MetaTopicValue {
-    Publisher(Vec<PublisherMTE>),
-    ClientPublisher(Vec<ClientPublisherMTE>),
-    ServerPublisher(Vec<ServerPublisherMTE>),
-    Subscription(Vec<SubscriptionMTE>),
-    ClientSubscription(Vec<ClientSubscriptionMTE>),
-    ServerSubscription(Vec<ServerSubscriptionMTE>),
-    Client(Vec<ClientMTE>),
+    Publisher(Vec<PublisherMetaValue>),
+    ClientPublisher(Vec<ClientPublisherMetaValue>),
+    ServerPublisher(Vec<ServerPublisherMetaValue>),
+    Subscription(Vec<SubscriptionMetaValue>),
+    ClientSubscription(Vec<ClientSubscriptionMetaValue>),
+    ServerSubscription(Vec<ServerSubscriptionMetaValue>),
+    Client(Vec<ClientMetaValue>),
 }
 impl MetaTopicValue {
     pub fn merge(&mut self, other: Self) {
@@ -216,20 +240,9 @@ impl MetaTopicValue {
         rmp::encode::write_array_len(&mut buf, 4)?;
         rmp::encode::write_i32(&mut buf, topic_id)?;
         rmp::encode::write_uint(&mut buf, now())?;
-        rmp::encode::write_u8(&mut buf, FrcTypeExt::as_u8(&FrcType::Raw))?;
+        rmp::encode::write_u8(&mut buf, 5)?;
         buf.extend_from_slice(&value);
 
         Ok(buf)
     }
 }
-
-// #[derive(Debug, Clone, Hash, PartialEq, Eq)]
-// pub enum MetaTopicVariants {
-//     Clients,
-//     ServerSub,
-//     ClientSub{ client_name: String },
-//     ServerPub,
-//     ClientPub{ client_name: String },
-//     Subs{ topic_name: String },
-//     Topics{ topic_name: String },
-// }

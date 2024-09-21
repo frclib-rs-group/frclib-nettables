@@ -33,28 +33,14 @@ pub mod error;
 
 use std::sync::atomic::AtomicU64;
 
-pub use error::NetworkTablesError;
-
-pub mod client;
-pub mod server;
-pub(crate) mod spec;
-pub(crate) mod bimap;
-#[cfg(test)]
-mod test;
+pub(crate) mod client;
+pub(crate) mod server;
+pub(crate) mod shared;
+pub mod spec;
 
 pub use rmpv::{self, Value};
 
-type WebSocket = tokio_tungstenite::WebSocketStream<tokio_tungstenite::MaybeTlsStream<tokio::net::TcpStream>>;
-
-pub use error::*;
-
-#[inline]
-fn log_result<T, E: std::error::Error>(result: Result<T, E>) -> Result<T, E> {
-    if let Err(err) = &result {
-        tracing::error!("{err}");
-    }
-    result
-}
+pub use error::{NetworkTablesError, NtSuccess};
 
 static SEED: AtomicU64 = AtomicU64::new(0);
 

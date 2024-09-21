@@ -8,7 +8,7 @@ pub trait FrcTypeExt {
     fn from_u8(byte: u8) -> Option<Self>
     where
         Self: Sized;
-    fn stringify(&self) -> String;
+    fn stringify(&self) -> &'static str;
 }
 
 impl FrcTypeExt for FrcType {
@@ -43,7 +43,7 @@ impl FrcTypeExt for FrcType {
             _ => None,
         }
     }
-    fn stringify(&self) -> String {
+    fn stringify(&self) -> &'static str {
         match self {
             Self::Boolean => "boolean",
             Self::Double => "double",
@@ -52,16 +52,13 @@ impl FrcTypeExt for FrcType {
             Self::String => "string",
             Self::Raw | Self::Void => "raw",
             Self::Struct(desc) => desc.type_str,
-            Self::StructArray(desc) => {
-                return format!("{}[]", desc.type_str);
-            }
+            Self::StructArray(desc) => desc.type_str,
             Self::BooleanArray => "boolean[]",
             Self::DoubleArray => "double[]",
             Self::IntArray => "int[]",
             Self::FloatArray => "float[]",
             Self::StringArray => "string[]",
         }
-        .to_string()
     }
 }
 

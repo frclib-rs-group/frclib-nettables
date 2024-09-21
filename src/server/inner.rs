@@ -8,7 +8,7 @@ use std::{
 
 use frclib_core::value::FrcTimestampedValue;
 use nohash_hasher::{IntMap, IntSet};
-use tokio_tungstenite::tungstenite::protocol::Message;
+use tungstenite::protocol::Message;
 
 use tokio::{
     sync::mpsc::{channel, Receiver, Sender},
@@ -24,7 +24,7 @@ use crate::{
             Announce, NTMessage, PublishTopic, SetProperties, Subscribe, UnAnnounce,
             UnpublishTopic, Unsubscribe,
         },
-        metatopic::{ClientPublisherMTE, MetaTopicValue},
+        metatopic::{ClientPublisherMetaValue, MetaTopicValue},
         subscription::{Subscription, SubscriptionOptions},
         topic::{PublishProperties, Topic},
     },
@@ -391,7 +391,7 @@ impl InnerServer {
         let pubuid = pub_topic.pubuid;
 
         //get mte before topic is consumed
-        let pub_mte = ClientPublisherMTE {
+        let pub_mte = ClientPublisherMetaValue {
             topic: pub_topic.name.clone(),
             uid: pubuid,
         };
@@ -459,7 +459,7 @@ impl InnerServer {
                 pub_topic.pubuid, client_idx
             )))?;
 
-        let pub_mte = ClientPublisherMTE {
+        let pub_mte = ClientPublisherMetaValue {
             topic: lock!(self.topics)
                 .get(&topic_idx)
                 .cloned()

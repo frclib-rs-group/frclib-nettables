@@ -1,16 +1,16 @@
 use std::{fmt::Debug, io};
 
-use futures_util::future::BoxFuture;
-use tokio_tungstenite::tungstenite::error::ProtocolError;
+use futures::future::BoxFuture;
+use tungstenite::error::ProtocolError;
 
-use crate::spec::topic::Topic;
+use crate::shared::topic::Topic;
 
 pub struct ClientConfig {
     /// milliseconds
     pub connect_timeout: u64,
     /// milliseconds
     pub disconnect_retry_interval: u64,
-    pub should_reconnect: Box<dyn Fn(&tokio_tungstenite::tungstenite::Error) -> bool + Send + Sync>,
+    pub should_reconnect: Box<dyn Fn(&tungstenite::Error) -> bool + Send + Sync>,
     pub on_announce: Box<dyn Fn(&Topic) -> BoxFuture<()> + Send + Sync>,
     pub on_unannounce: Box<dyn Fn(Option<Topic>) -> BoxFuture<'static, ()> + Send + Sync>,
     /// Called when there is an error with the websocket and `should_reconnect` returns true
@@ -40,15 +40,15 @@ impl Default for ClientConfig {
     }
 }
 
-pub(super) fn default_should_reconnect(err: &tokio_tungstenite::tungstenite::Error) -> bool {
+pub(super) fn default_should_reconnect(err: &tungstenite::Error) -> bool {
     match err {
-        tokio_tungstenite::tungstenite::Error::AlreadyClosed
-        | tokio_tungstenite::tungstenite::Error::ConnectionClosed => true,
-        tokio_tungstenite::tungstenite::Error::Protocol(protocol_err) => match protocol_err {
+        tungstenite::Error::AlreadyClosed
+        | tungstenite::Error::ConnectionClosed => true,
+        tungstenite::Error::Protocol(protocol_err) => match protocol_err {
             ProtocolError::SendAfterClosing | ProtocolError::ResetWithoutClosingHandshake => true,
             _ => false,
         },
-        tokio_tungstenite::tungstenite::Error::Io(err) => match err.kind() {
+        tungstenite::Error::Io(err) => match err.kind() {
             io::ErrorKind::ConnectionReset
             | io::ErrorKind::ConnectionAborted
             | io::ErrorKind::TimedOut => true,

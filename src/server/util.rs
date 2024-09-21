@@ -7,7 +7,7 @@ use std::{
 };
 
 use frclib_core::value::FrcTimestampedValue as TimestampedValue;
-use tokio_tungstenite::tungstenite::Message;
+use tungstenite::Message;
 
 use crate::{
     spec::{
@@ -71,8 +71,8 @@ impl ClientIdentity {
             name: self.1,
         })
     }
-    pub(super) fn to_mte(&self) -> ClientMTE {
-        ClientMTE {
+    pub(super) fn to_mte(&self) -> ClientMetaValue {
+        ClientMetaValue {
             id: self.name().to_string(),
             conn: self.addr().to_string(),
         }

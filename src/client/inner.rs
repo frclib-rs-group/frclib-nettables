@@ -2,27 +2,18 @@ use std::{
     collections::{HashMap, VecDeque},
     net::SocketAddr,
     ops::Div,
-    sync::{Arc, Weak},
+    sync::{atomic::{AtomicI32, AtomicU32, AtomicU64}, Arc, Mutex, Weak},
     time::{Duration, Instant, SystemTime, UNIX_EPOCH},
 };
 
-use crate::{log_result, spec::extensions::FrcTypeExt};
 
 use super::{config::ClientConfig, util::UnsignedIntOrNegativeOne};
-use crate::spec::{
-    messages::Announce, messages::NTMessage, messages::PublishTopic, messages::Subscribe,
-    subscription::InternalSub, subscription::MessageData, topic::PublishedTopic, topic::Topic,
-};
-use crate::WebSocket;
+use crate::{shared::topic::Topic, spec::messages::{Announce, NTMessage, PublishTopic, Subscribe}, NetworkTablesError};
 use frclib_core::value::FrcType;
-use futures_util::{SinkExt, TryStreamExt};
-use tokio::{
-    select,
-    sync::{mpsc, oneshot, Mutex},
-    task::yield_now,
-};
+use futures::{SinkExt, TryStreamExt};
 
-use tokio_tungstenite::tungstenite::{client::IntoClientRequest, http::HeaderValue, Message, protocol::CloseFrame};
+
+use tungstenite::{client::IntoClientRequest, http::HeaderValue, Message, protocol::CloseFrame};
 
 #[derive(Debug)]
 pub(super) struct InnerClient {
@@ -31,15 +22,14 @@ pub(super) struct InnerClient {
     pub(super) subscriptions: Mutex<HashMap<i32, InternalSub>>,
     pub(super) announced_topics: Mutex<HashMap<i32, Topic>>,
     pub(super) client_published_topics: Mutex<HashMap<u32, PublishedTopic>>,
-    pub(super) socket_sender: mpsc::Sender<Message>,
-    pub(super) socket_panic_receiver: Mutex<oneshot::Receiver<crate::NetworkTablesError>>,
-    pub(super) server_time_offset: parking_lot::Mutex<u64>,
-    pub(super) sub_counter: parking_lot::Mutex<i32>,
-    pub(super) topic_counter: parking_lot::Mutex<u32>,
+    pub(super) runner_panic: Arc<Mutex<Option<NetworkTablesError>>>,
+    pub(super) server_time_offset: AtomicU64,
+    pub(super) sub_counter: AtomicI32,
+    pub(super) topic_counter: AtomicU32,
     pub(super) config: ClientConfig,
     // Has to be mutable to prevent overflow if it becomes too long ago
-    pub(super) start_instant: parking_lot::Mutex<Instant>,
-    pub(super) start_time: parking_lot::Mutex<SystemTime>,
+    pub(super) start_instant: Instant,
+    pub(super) start_time: SystemTime,
     pub(super) identity: String,
 }
 
